@@ -25,18 +25,18 @@ from classes.neural_net import NeuralNetwork
 
 lr = 1e-4
 dropout_percent = 0.5
-l2_reg = 1.2e-6
+l2_reg = 5e-6
 
 # 32 * 32 color image
 input_size = (3,32,32)
 
 cnn = NeuralNetwork(input_size,
                     [
-                        {'type': 'conv', 'k': 16, 'u_type': 'm', 'f': 5, 's': 1, 'p': 2},
+                        {'type': 'conv', 'k': 16, 'u_type': 'nag', 'f': 5, 's': 1, 'p': 2},
                         {'type': 'pool'},
-                        {'type': 'conv', 'k': 20, 'u_type': 'm', 'f': 5, 's': 1, 'p': 2},
+                        {'type': 'conv', 'k': 20, 'u_type': 'nag', 'f': 5, 's': 1, 'p': 2},
                         {'type': 'pool'},
-                        {'type': 'conv', 'k': 20, 'u_type': 'm', 'f': 5, 's': 1, 'p': 2},
+                        {'type': 'conv', 'k': 20, 'u_type': 'nag', 'f': 5, 's': 1, 'p': 2},
                         {'type': 'pool'},
                         {'type': 'output', 'k': len(le.classes_), 'u_type': 'adam'}
                     ]
@@ -49,7 +49,7 @@ for i in range(600000):
 
 ```
 
-here goes image
+Example CIFAR-10 gets ~70% test accuracy in 20 epoch.
 
 
 ## API Referecne
