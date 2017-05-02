@@ -13,7 +13,7 @@ This is Convolutional Neural Network only in python & numpy. It is simple and sl
 **Loss Function :** Softmax, Logistic
 
 ## Prerequisites
-numpy (+ mkl for intel processors. recommend [anaconda](https://www.continuum.io/downloads))  
+numpy (+ mkl for intel processors. recommend [anaconda](https://www.continuum.io/downloads))
 Used sklearn for LabelEncoder & utils.shuffle on examples.
 
 
@@ -95,4 +95,7 @@ classes.ConvLayer(input_size, k, f=3, s=1, p=1, u_type='adam', a_type='relu')
 - [ ] More update policies.
 - [ ] More activation functions.
 - [ ] Speed tuning.
+
+## License
+MIT
 
