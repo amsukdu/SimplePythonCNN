@@ -4,16 +4,17 @@ This is Convolutional Neural Network only in python & numpy. It is simple and sl
 ## Specification
 **Weight Initialization :** Xavier
 
-**Weight Update Policy :** Adam, NAG, Momentum, Vanila
+**Weight Update Policy :** ADAM, NAG, Momentum, Vanila
 
 **Active Function :** ReLU, Sigmoid
 
-**Regulization :** Droupout, L2
+**Regulization :** Droupout(only on fc), L2
 
 **Loss Function :** Softmax, Logistic
 
 ## Prerequisites
-numpy (but I used sklearn for LabelEncoder & utils.shuffle on examples)
+numpy (+ mkl for intel processors. recommend [anaconda](https://www.continuum.io/downloads))
+Used sklearn for LabelEncoder & utils.shuffle on examples.
 
 
 ## Example
@@ -24,23 +25,22 @@ AND gate and CIFAR-10 examples are included.
 from classes.neural_net import NeuralNetwork
 
 lr = 1e-4
-dropout_percent = 0.5
-l2_reg = 1.2e-6
+l2_reg = 5e-6
 
 # 32 * 32 color image
 input_size = (3,32,32)
 
 cnn = NeuralNetwork(input_size,
                     [
-                        {'type': 'conv', 'k': 16, 'u_type': 'm', 'f': 5, 's': 1, 'p': 2},
+                        {'type': 'conv', 'k': 16, 'u_type': 'nag', 'f': 5, 's': 1, 'p': 2},
                         {'type': 'pool'},
-                        {'type': 'conv', 'k': 20, 'u_type': 'm', 'f': 5, 's': 1, 'p': 2},
+                        {'type': 'conv', 'k': 20, 'u_type': 'nag', 'f': 5, 's': 1, 'p': 2},
                         {'type': 'pool'},
-                        {'type': 'conv', 'k': 20, 'u_type': 'm', 'f': 5, 's': 1, 'p': 2},
+                        {'type': 'conv', 'k': 20, 'u_type': 'nag', 'f': 5, 's': 1, 'p': 2},
                         {'type': 'pool'},
                         {'type': 'output', 'k': len(le.classes_), 'u_type': 'adam'}
                     ]
-                    , lr, l2_reg=l2_reg, dropout_p=dropout_percent)
+                    , lr, l2_reg=l2_reg)
 
 
 for i in range(600000):
@@ -49,7 +49,7 @@ for i in range(600000):
 
 ```
 
-here goes image
+CIFAR-10 example gets ~70% test accuracy in 20 epoch.
 
 
 ## API Referecne
@@ -92,7 +92,10 @@ classes.ConvLayer(input_size, k, f=3, s=1, p=1, u_type='adam', a_type='relu')
 | Sigmoid | 'sigmoid' |
 
 ## ToDos
-- [ ] More update policies
-- [ ] More activation functions
-- [ ] Speed Tuning
+- [ ] More update policies.
+- [ ] More activation functions.
+- [ ] Speed tuning.
+
+## License
+MIT
 

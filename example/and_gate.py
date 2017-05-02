@@ -1,12 +1,6 @@
 import sys, os
 sys.path.insert(1, os.path.split(sys.path[0])[0])
-import cPickle as pkl
-# import skimage.io as io
 import numpy as np
-from matplotlib import pyplot as plt
-from sklearn import preprocessing
-from classes import utils
-from sklearn.utils import shuffle
 from classes.neural_net import NeuralNetwork
 
 
