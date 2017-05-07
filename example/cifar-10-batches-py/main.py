@@ -1,3 +1,5 @@
+import sys, os
+sys.path.insert(1, os.path.split(os.path.split(sys.path[0])[0])[0])
 import cPickle as pkl
 import numpy as np
 from sklearn import preprocessing
@@ -11,7 +13,7 @@ def unpickle(file):
     return dict
 
 le = preprocessing.LabelEncoder()
-le.classes_ = unpickle('batches.meta')['label_names']
+le.classes_ = unpickle(sys.path[0] + '/batches.meta')['label_names']
 
 train_images = None
 train_labels = []
@@ -19,7 +21,7 @@ train_labels = []
 test_images = None
 test_labels = []
 for i in xrange(1, 6):
-    data = unpickle('data_batch_'+str(i))
+    data = unpickle(sys.path[0] + '/data_batch_'+str(i))
     if train_images is None:
         train_images = data['data']
     else:
@@ -39,7 +41,7 @@ train_images[:, 0] -= r_mean
 train_images[:, 1] -= g_mean
 train_images[:, 2] -= b_mean
 
-data = unpickle('test_batch')
+data = unpickle(sys.path[0] + '/test_batch')
 test_images = data['data'].reshape(-1, 3, 32, 32)
 test_images = test_images.astype(np.float32)
 test_images /= np.float32(255)
@@ -52,8 +54,8 @@ test_labels = data['labels']
 
 lr = 1e-4
 dropout_percent = 0.5
-l2_reg = 5e-6
-learning_rate_decay = np.float32(98e-2)
+l2_reg = 4e-6
+learning_rate_decay = np.float32(99e-2)
 batch_size = 1
 
 cnn = NeuralNetwork(train_images.shape[1:],

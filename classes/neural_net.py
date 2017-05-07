@@ -54,7 +54,10 @@ class NeuralNetwork(object):
                 next_input *= self.dropout_p
 
         result = np.array(next_input)
-        loss, delta = utils.softmax_loss(result, label)
+        if self.loss == 'softmax':
+            loss, delta = utils.softmax_loss(result, label)
+        elif self.loss == 'logistic':
+            loss, delta = utils.logistic_loss(result, label)
 
         max_result = np.argmax(result, axis=0)
         correct_count = np.sum(max_result == label)

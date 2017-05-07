@@ -65,6 +65,7 @@ def adam_update(neurons, lr, t, l2_reg=0, beta1=np.float32(0.9), beta2=np.float3
     for n in neurons:
         l2 = l2_reg * n.weights
         dx = (n.last_input.dot(n.delta)).T
+        dBias = np.average(n.delta)
 
         n.m = beta1 * n.m + (1 - beta1) * dx
         n.v = beta2 * n.v + (1 - beta2)*(dx**2)
@@ -74,33 +75,40 @@ def adam_update(neurons, lr, t, l2_reg=0, beta1=np.float32(0.9), beta2=np.float3
             n.v /= np.float32(1-beta2**t)
 
         n.weights -= lr * n.m / (np.sqrt(n.v) + 1e-8) + l2
+        n.b -= lr * dBias
 
 def nag_update(neurons, lr, l2_reg=0, mu=np.float32(0.9)):
     for n in neurons:
         l2 = l2_reg * n.weights
         dx = (n.last_input.dot(n.delta)).T
+        dBias = np.average(n.delta)
 
         n.v_prev = n.v
         n.v = mu * n.v - lr * dx
 
         n.weights += -mu * n.v_prev + (1 + mu) * n.v - l2
+        n.b -= lr * dBias
 
 def momentum_update(neurons, lr, l2_reg=0, mu=np.float32(0.9)):
     for n in neurons:
         l2 = l2_reg * n.weights
         dx = (n.last_input.dot(n.delta)).T
+        dBias = np.average(n.delta)
 
         n.v = mu * n.v - lr * dx
 
         n.weights += n.v - l2
+        n.b -= lr * dBias
 
 
 def vanila_update(neurons, lr, l2_reg=0):
     for n in neurons:
         l2 = l2_reg * n.weights
-        d = (n.last_input.dot(n.delta)).T
+        dx = (n.last_input.dot(n.delta)).T
+        dBias = np.average(n.delta)
 
-        n.weights -= lr * d + l2
+        n.weights -= lr * dx + l2
+        n.b -= lr * dBias
 
 def sigmoid(input):
     return 1/(1+np.exp(-input))
