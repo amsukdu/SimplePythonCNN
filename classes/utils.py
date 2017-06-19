@@ -8,6 +8,7 @@ def softmax_loss(x, y):
     loss = -np.sum(np.log(probs[xrange(N), y])) / N
     dx = probs
     dx[xrange(N), y] -= 1
+    dx /= N
     return loss, dx
 
 
