@@ -29,51 +29,39 @@ for i in xrange(1, 6):
 
     train_labels += data['labels']
 
-# train_images = train_images[:100]
-# train_labels = train_labels[:100]
-
 train_images = train_images.reshape(-1, 3, 32, 32)
 train_images = train_images.astype(np.float128)
-train_images /= 255.0
 
-r_mean = np.average(train_images[:, 0])
-g_mean = np.average(train_images[:, 1])
-b_mean = np.average(train_images[:, 2])
-
-train_images[:, 0] -= r_mean
-train_images[:, 1] -= g_mean
-train_images[:, 2] -= b_mean
+mean_image= np.mean(train_images, axis=0)
+train_images -= mean_image
+std = np.std(train_images, axis=0)
+train_images /= std
 
 train_images = train_images.astype(np.float32)
 
 data = unpickle(sys.path[0] + '/test_batch')
 test_images = data['data'].reshape(-1, 3, 32, 32)
 test_images = test_images.astype(np.float128)
-test_images /= 255.0
 
-test_images[:, 0] -= r_mean
-test_images[:, 1] -= g_mean
-test_images[:, 2] -= b_mean
+test_images -= mean_image
+test_images /= std
 
-test_images.astype(np.float32)
+test_images = test_images.astype(np.float32)
 
 test_labels = data['labels']
 
 lr = 1e-4
-dropout_percent = 0.5
-l2_reg = 4e-7
-learning_rate_decay = np.float32(99e-2)
-batch_size = 10
+dropout_percent = 0.4
+l2_reg = 0
+learning_rate_decay = np.float32(100e-2)
+batch_size = 125
 
 cnn = NeuralNetwork(train_images.shape[1:],
                     [
-                        {'type': 'conv', 'k': 16, 'u_type': 'adam', 'f': 5, 's': 1, 'p': 2},
-                        {'type': 'pool'},
-                        {'type': 'conv', 'k': 20, 'u_type': 'adam', 'f': 5, 's': 1, 'p': 2},
-                        {'type': 'pool'},
-                        {'type': 'conv', 'k': 20, 'u_type': 'adam', 'f': 5, 's': 1, 'p': 2},
-                        {'type': 'pool'},
-                        {'type': 'output', 'k': len(le.classes_), 'u_type': 'adam'}
+                        {'type': 'conv', 'k': 32},
+                        {'type': 'conv', 'k': 64},
+                        {'type': 'fc', 'k': 1024},
+                        {'type': 'output', 'k': len(le.classes_)}
                     ]
                     , lr, l2_reg=l2_reg, dropout_p=dropout_percent)
 
@@ -89,11 +77,11 @@ for i in xrange(60000000):
         print '{} epoch finish. learning rate is {}'.format(str(cnn.epoch_count), str(cnn.lr))
         cnn.lr *= learning_rate_decay
 
-        loss, acc = cnn.predict(train_images[:4000], train_labels[:4000])
+        loss, acc = cnn.predict(train_images[:2000], train_labels[:2000])
         print 'training acc:{}'.format(acc)
         print 'training loss:{}'.format(loss)
 
-        test_loss, test_acc = cnn.predict(test_images, test_labels)
+        test_loss, test_acc = cnn.predict(test_images[:2000], test_labels[:2000])
         print 'test acc:{}'.format(test_acc)
         print 'test loss:{}'.format(test_loss)
 
