@@ -1,6 +1,6 @@
 import numpy as np
-from neural_layer import NeuralLayer
-import utils as u
+from classes.neural_layer import NeuralLayer
+import classes.utils as u
 
 
 class ConvLayer(NeuralLayer):
@@ -69,7 +69,7 @@ class ConvLayer(NeuralLayer):
             d = d.reshape(self.w2, self.h2, self.k, -1).T
 
         delta = d * u.relu_d(self.forward_result)
-        padding = ((self.w - 1) * self.s + self.f - self.w2) / 2
+        padding = ((self.w - 1) * self.s + self.f - self.w2) // 2
         cols = u.im2col_indices(delta, self.f, self.f, padding=padding, stride=self.s)
         sum_weights = []
         for index, n in enumerate(self.neurons):

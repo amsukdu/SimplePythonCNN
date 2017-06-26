@@ -1,7 +1,7 @@
 from classes.layer import Layer
-from neuron import Neuron
+from classes.neuron import Neuron
 import numpy as np
-import utils as u
+import classes.utils as u
 
 
 class NeuralLayer(Layer):
@@ -17,7 +17,7 @@ class NeuralLayer(Layer):
         if isinstance(input_size, tuple):
             input_size = np.prod(input_size)
 
-        for n in xrange(k):
+        for n in range(k):
             self.neurons.append(Neuron(input_size))
 
     def predict(self, batch):

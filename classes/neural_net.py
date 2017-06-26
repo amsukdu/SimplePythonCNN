@@ -1,8 +1,8 @@
-from neural_layer import NeuralLayer
-from conv_layer import ConvLayer
-from pool_layer import PoolLayer
+from classes.neural_layer import NeuralLayer
+from classes.conv_layer import ConvLayer
+from classes.pool_layer import PoolLayer
+import classes.utils as utils
 import numpy as np
-import utils
 
 class NeuralNetwork(object):
     def __init__(self, input_shape, layer_list, lr, l2_reg=0, dropout_p=1, loss='softmax'):
@@ -43,7 +43,6 @@ class NeuralNetwork(object):
                 fc.activation = False
                 self.layers.append(fc)
                 next_input_size = fc.output_size()
-
 
     def predict(self, batch, label):
         next_input = batch
@@ -97,10 +96,8 @@ class NeuralNetwork(object):
                 dropout_mask = self.dropout_masks.pop()
                 back_input *= dropout_mask
 
-
         # update
         for index, layer in enumerate(self.layers):
             layer.update(self.lr, l2_reg=self.l2_reg, t=self.t)
-
 
         return loss + self.l2_reg * l2 / 2, correct_count / float(len(max_result)) * 100
