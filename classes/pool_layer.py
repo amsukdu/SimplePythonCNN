@@ -1,6 +1,6 @@
 import numpy as np
-from layer import Layer
-import utils as u
+from classes.layer import Layer
+import classes.utils as u
 
 
 # TODO only not overlapping f & s works...
@@ -30,7 +30,7 @@ class PoolLayer(Layer):
 
         offset = 0
         i_offset = 0
-        for i in xrange(self.h):
+        for i in range(self.h):
             if i % self.f == 0:
                 start = self.w * i
                 offset = start
@@ -38,8 +38,8 @@ class PoolLayer(Layer):
             else:
                 start = self.f * (i - i_offset) + offset
 
-            for j in xrange(self.w / self.f):
-                self.indices += xrange(start, start + self.f)
+            for j in range(int(self.w / self.f)):
+                self.indices += range(start, start + self.f)
                 start += field_size
 
 

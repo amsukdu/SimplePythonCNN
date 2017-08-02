@@ -1,13 +1,14 @@
 import numpy as np
 
+
 def softmax_loss(x, y):
     x = x.T
     probs = np.exp(x - np.max(x, axis=1, keepdims=True))
     probs /= np.sum(probs, axis=1, keepdims=True)
     N = x.shape[0]
-    loss = -np.sum(np.log(probs[xrange(N), y])) / N
+    loss = -np.sum(np.log(probs[range(N), y])) / N
     dx = probs
-    dx[xrange(N), y] -= 1
+    dx[range(N), y] -= 1
     dx /= N
     return loss, dx
 
@@ -18,12 +19,13 @@ def logistic_loss(x, y):
     dx = -(y - x)
     return loss, dx.T
 
+
 def get_im2col_indices(x_shape, field_height, field_width, padding=1, stride=1):
     N, C, H, W = x_shape
     assert (H + 2 * padding - field_height) % stride == 0
     assert (W + 2 * padding - field_height) % stride == 0
-    out_height = (H + 2 * padding - field_height) / stride + 1
-    out_width = (W + 2 * padding - field_width) / stride + 1
+    out_height = (H + 2 * padding - field_height) // stride + 1
+    out_width = (W + 2 * padding - field_width) // stride + 1
 
     i0 = np.repeat(np.arange(field_height), field_width)
     i0 = np.tile(i0, C)
@@ -78,6 +80,7 @@ def adam_update(neurons, lr, t, l2_reg=0, beta1=np.float32(0.9), beta2=np.float3
         n.weights -= lr * m / (np.sqrt(v) + 1e-8) + l2
         n.b -= lr * d_bias
 
+
 def nag_update(neurons, lr, l2_reg=0, mu=np.float32(0.9)):
     for n in neurons:
         l2 = l2_reg * n.weights
@@ -89,6 +92,7 @@ def nag_update(neurons, lr, l2_reg=0, mu=np.float32(0.9)):
 
         n.weights += -mu * n.v_prev + (1 + mu) * n.v - l2
         n.b -= lr * d_bias
+
 
 def momentum_update(neurons, lr, l2_reg=0, mu=np.float32(0.9)):
     for n in neurons:
@@ -111,14 +115,18 @@ def vanila_update(neurons, lr, l2_reg=0):
         n.weights -= lr * dx + l2
         n.b -= lr * d_bias
 
+
 def sigmoid(input):
     return 1/(1+np.exp(-input))
+
 
 def relu(input):
     return np.maximum(0, input)
 
+
 def sigmoid_d(input):
     return input * (1 - input)
+
 
 def relu_d(input):
     return input > 0
