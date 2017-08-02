@@ -38,7 +38,7 @@ class PoolLayer(Layer):
             else:
                 start = self.f * (i - i_offset) + offset
 
-            for j in range(self.w / self.f):
+            for j in range(int(self.w / self.f)):
                 self.indices += range(start, start + self.f)
                 start += field_size
 
