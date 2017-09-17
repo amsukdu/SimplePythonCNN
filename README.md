@@ -85,6 +85,7 @@ classes.ConvLayer(input_size, k, f=3, s=1, p=1, u_type='adam', a_type='relu')
 | Momentum | 'm' |
 | Vanilla | 'v' |
 | NAG | 'nag' |
+| RMSProp | 'rmsprop' |
 
 | Activation Function |a_type|
 | --- | --- |
