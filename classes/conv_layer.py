@@ -26,12 +26,13 @@ class ConvLayer(NeuralLayer):
         self.image_size = batch.shape[0]
         cols = u.im2col_indices(batch, self.f, self.f, self.p, self.s)
         sum_weights = []
+        bias = []
         for n in self.neurons:
-            n.last_input = cols
+            bias.append(n.b)
             sum_weights.append(n.weights)
 
         sum_weights = np.array(sum_weights)
-        strength = sum_weights.dot(cols).reshape(self.k, self.h2, self.w2, -1).transpose(3, 0, 1, 2)
+        strength = (sum_weights.dot(cols) + np.array(bias).reshape(sum_weights.shape[0], 1)).reshape(self.k, self.h2, self.w2, -1).transpose(3, 0, 1, 2)
 
         if self.activation:
             if self.a_type == 'sigmoid':
@@ -46,13 +47,15 @@ class ConvLayer(NeuralLayer):
         cols = u.im2col_indices(batch, self.f, self.f, self.p, self.s)
         l2 = 0
         sum_weights = []
+        bias = []
         for n in self.neurons:
             n.last_input = cols
             sum_weights.append(n.weights)
+            bias.append(n.b)
             l2 += n.regularization()
 
         sum_weights = np.array(sum_weights)
-        strength = sum_weights.dot(cols).reshape(self.k, self.h2, self.w2, -1).transpose(3, 0, 1, 2)
+        strength = (sum_weights.dot(cols) + np.array(bias).reshape(sum_weights.shape[0], 1)).reshape(self.k, self.h2, self.w2, -1).transpose(3, 0, 1, 2)
 
         if self.activation:
             if self.a_type == 'sigmoid':

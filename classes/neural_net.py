@@ -11,7 +11,6 @@ class NeuralNetwork(object):
         self.l2_reg = np.float32(l2_reg)
         self.loss = loss
 
-        # dropout
         self.dropout_p = dropout_p
         self.dropout_masks = []
         self.t = 0

@@ -52,9 +52,9 @@ test_images = test_images.astype(np.float32)
 test_labels = data['labels']
 
 lr = 1e-4
-dropout_percent = 0.4
-l2_reg = 3e-6
-learning_rate_decay = np.float32(100e-2)
+dropout_percent = 1
+l2_reg = 6e-6
+learning_rate_decay = np.float32(96e-2)
 batch_size = 1
 
 cnn = NeuralNetwork(train_images.shape[1:],
@@ -65,7 +65,7 @@ cnn = NeuralNetwork(train_images.shape[1:],
                         {'type': 'pool'},
                         {'type': 'conv', 'k': 20, 'u_type': 'nag', 'f': 5, 's': 1, 'p': 2},
                         {'type': 'pool'},
-                        {'type': 'output', 'k': len(le.classes_), 'u_type': 'adam'}
+                        {'type': 'output', 'k': len(le.classes_), 'u_type': 'nag'}
                     ]
                     , lr, l2_reg=l2_reg, dropout_p=dropout_percent)
 

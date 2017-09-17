@@ -18,7 +18,16 @@ class NeuralLayer(Layer):
             input_size = np.prod(input_size)
 
         for n in range(k):
-            self.neurons.append(Neuron(input_size))
+            n = Neuron(input_size)
+            if u_type == 'adam':
+                n.m_bias, n.v_bias, n.m, n.v = 0, 0, 0, 0
+            elif u_type == 'm':
+                n.v_bias, n.v = 0, 0
+            elif u_type == 'nag':
+                n.v, n.v_bias, n.v_prev, n.v_prev_bias = 0, 0, 0, 0
+            elif u_type == 'rmsprop':
+                n.cache, n.cache_bias, n.v, n.v = 0, 0, 0, 0
+            self.neurons.append(n)
 
     def predict(self, batch):
 
@@ -91,6 +100,8 @@ class NeuralLayer(Layer):
     def update(self, lr, l2_reg, t=0):
         if self.u_type == 'adam':
             u.adam_update(self.neurons, lr, t=t, l2_reg=l2_reg)
+        elif self.u_type == 'rmsprop':
+            u.rmsprop(self.neurons, lr, l2_reg=l2_reg)
         elif self.u_type == 'm':
             u.momentum_update(self.neurons, lr, l2_reg=l2_reg)
         elif self.u_type == 'nag':
