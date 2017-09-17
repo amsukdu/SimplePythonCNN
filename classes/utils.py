@@ -65,9 +65,23 @@ def col2im_indices(cols, x_shape, field_height=3, field_width=3, padding=1, stri
     return x_padded[:, :, padding:-padding, padding:-padding]
 
 
-def adam_update(neurons, lr, t, l2_reg=0, beta1=np.float32(0.9), beta2=np.float32(0.999)):
+def rmsprop(neurons, lr, decay_rate=0.9, l2_reg=0, eps=1e-8):
     for n in neurons:
-        l2 = l2_reg * n.weights
+        dx = (n.last_input.dot(n.delta)).T
+        d_bias = np.average(n.delta)
+
+        n.cache = decay_rate * n.cache + (1 - decay_rate) * (dx ** 2)
+        if l2_reg > 0:
+            n.weights += - lr * dx / (np.sqrt(n.v) + eps) - l2_reg * n.weights
+        else:
+            n.weights += - lr * dx / (np.sqrt(n.v) + eps)
+
+        n.cache_bias = decay_rate * n.cache_bias + (1 - decay_rate) * (d_bias ** 2)
+        n.b -= lr * d_bias / (np.sqrt(n.cache_bias) + eps)
+
+def adam_update(neurons, lr, t, l2_reg=0, beta1=np.float32(0.9), beta2=np.float32(0.999), eps=1e-8):
+    for n in neurons:
+
         dx = (n.last_input.dot(n.delta)).T
         d_bias = np.average(n.delta)
 
@@ -77,21 +91,35 @@ def adam_update(neurons, lr, t, l2_reg=0, beta1=np.float32(0.9), beta2=np.float3
         m = n.m / np.float32(1-beta1**t)
         v = n.v / np.float32(1-beta2**t)
 
-        n.weights -= lr * m / (np.sqrt(v) + 1e-8) + l2
-        n.b -= lr * d_bias
+        if l2_reg > 0:
+            n.weights -= lr * m / (np.sqrt(v) + eps) + l2_reg * n.weights
+        else:
+            n.weights -= lr * m / (np.sqrt(v) + eps)
+
+        n.m_bias = beta1 * n.m_bias + (1 - beta1) * d_bias
+        n.v_bias = beta2 * n.v_bias + (1 - beta2) * (d_bias ** 2)
+
+        m = n.m_bias / np.float32(1 - beta1 ** t)
+        v = n.v_bias / np.float32(1 - beta2 ** t)
+
+        n.b -= lr * m / (np.sqrt(v) + eps)
 
 
 def nag_update(neurons, lr, l2_reg=0, mu=np.float32(0.9)):
     for n in neurons:
-        l2 = l2_reg * n.weights
         dx = (n.last_input.dot(n.delta)).T
         d_bias = np.average(n.delta)
 
         n.v_prev = n.v
         n.v = mu * n.v - lr * dx
+        if l2_reg > 0:
+            n.weights += -mu * n.v_prev + (1 + mu) * n.v - l2_reg * n.weights
+        else:
+            n.weights += -mu * n.v_prev + (1 + mu) * n.v
 
-        n.weights += -mu * n.v_prev + (1 + mu) * n.v - l2
-        n.b -= lr * d_bias
+        n.v_prev_bias = n.v_bias
+        n.v_bias = mu * n.v_bias - lr * d_bias
+        n.b += -mu * n.v_prev_bias + (1 + mu) * n.v_bias
 
 
 def momentum_update(neurons, lr, l2_reg=0, mu=np.float32(0.9)):
@@ -101,9 +129,13 @@ def momentum_update(neurons, lr, l2_reg=0, mu=np.float32(0.9)):
         d_bias = np.average(n.delta)
 
         n.v = mu * n.v - lr * dx
+        if l2_reg > 0:
+            n.weights += n.v - l2
+        else:
+            n.weights += n.v
 
-        n.weights += n.v - l2
-        n.b -= lr * d_bias
+        n.v_bias = mu * n.v_bias - lr * d_bias
+        n.b -= lr * n.v_bias
 
 
 def vanila_update(neurons, lr, l2_reg=0):

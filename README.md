@@ -2,7 +2,7 @@
 This is Convolutional Neural Network only in python & numpy. It is simple and slow but will get the job done :+1:
 
 ## Specification
-**Weight Initialization :** Xavier
+**Weight Initialization :** HE Normal
 
 **Weight Update Policy :** ADAM, NAG, Momentum, Vanila
 
@@ -49,10 +49,10 @@ for i in range(600000):
 
 ```
 
-CIFAR-10 example gets ~70% test accuracy in 20 epoch.
+CIFAR-10 example gets ~72% test accuracy in 20 epoch.
 
 
-## API Referecne
+## API Reference
 ```python
 classes.NeuralNetwork(input_shape, layer_list, lr, l2_reg=0, dropout_p=1, loss='softmax'):
 ```
@@ -91,10 +91,6 @@ classes.ConvLayer(input_size, k, f=3, s=1, p=1, u_type='adam', a_type='relu')
 | ReLU | 'relu' |
 | Sigmoid | 'sigmoid' |
 
-## ToDos
-- [ ] More update policies.
-- [ ] More activation functions.
-- [ ] Speed tuning.
 
 ## License
 MIT
