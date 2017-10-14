@@ -10,6 +10,8 @@ This is Convolutional Neural Network only in python & numpy. It is simple and sl
 
 **Regulization :** Droupout(only on fc), L2
 
+**Pooling :** Max, Average
+
 **Loss Function :** Softmax, Logistic
 
 ## Prerequisites
@@ -22,30 +24,20 @@ AND gate and CIFAR-10 examples are included.
 
 ```python
 
-from classes.neural_net import NeuralNetwork
-
 lr = 1e-4
-l2_reg = 5e-6
+l2_reg = 8e-6
 
-# 32 * 32 color image
-input_size = (3,32,32)
-
-cnn = NeuralNetwork(input_size,
+cnn = NeuralNetwork(train_images.shape[1:],
                     [
                         {'type': 'conv', 'k': 16, 'u_type': 'nag', 'f': 5, 's': 1, 'p': 2},
-                        {'type': 'pool'},
+                        {'type': 'pool', 'method': 'average'},
                         {'type': 'conv', 'k': 20, 'u_type': 'nag', 'f': 5, 's': 1, 'p': 2},
-                        {'type': 'pool'},
+                        {'type': 'pool', 'method': 'average'},
                         {'type': 'conv', 'k': 20, 'u_type': 'nag', 'f': 5, 's': 1, 'p': 2},
-                        {'type': 'pool'},
+                        {'type': 'pool', 'method': 'average'},
                         {'type': 'output', 'k': len(le.classes_), 'u_type': 'adam'}
                     ]
                     , lr, l2_reg=l2_reg)
-
-
-for i in range(600000):
-    loss, acc = cnn.epoch(train_images, train_labels)
-    test_loss, test_acc = cnn.predict(train_images, train_labels)
 
 ```
 
@@ -54,30 +46,32 @@ CIFAR-10 example gets ~72% test accuracy in 20 epoch.
 
 ## API Reference
 ```python
-classes.NeuralNetwork(input_shape, layer_list, lr, l2_reg=0, dropout_p=1, loss='softmax'):
+classes.NeuralNetwork(self, input_shape, layer_list, lr, l2_reg=0, loss='softmax'):
 ```
-
+<br />
 
 | Parameter | Description |
 | --- | --- |
 | input_shape | Data's numpy shape.  |
 | layer_list | List of layers you want to be networked. All of properties goes to **kwargs. |
 | lr | Learning rate. |
-| l2_reg | L2 regularization lambda. |
-| drouput_p | Dropout rate. 0 < dropout_p <= 1
+| l2_reg | L2 regularization|
 | loss | Loss function. 'softmax', 'logistic' |
 
 
 ```python
 # type fc, output
-classes.NeuralLayer(input_size, k, u_type='adam', a_type='relu')
+classes.NeuralLayer(input_size, k, f=3, s=1, p=1, u_type='adam', a_type='relu', dropout=1)
 
 # type pool
-classes.PoolLayer(input_size, f=2, s=2)
+classes.PoolLayer(input_size, f=2, s=2, method='max', dropout=1):
 
 # type conv
-classes.ConvLayer(input_size, k, f=3, s=1, p=1, u_type='adam', a_type='relu')
+classes.ConvLayer(input_size, k, f=3, s=1, p=1, u_type='adam', a_type='relu', dropout=1)
 ```
+<br />
+
+
 
 | Update Policy | u_type|
 | --- | --- |
@@ -92,6 +86,10 @@ classes.ConvLayer(input_size, k, f=3, s=1, p=1, u_type='adam', a_type='relu')
 | ReLU | 'relu' |
 | Sigmoid | 'sigmoid' |
 
+| Pooling |method|
+| --- | --- |
+| Max |'max' |
+|Avverage |'average'|
 
 ## License
 MIT

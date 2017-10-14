@@ -6,10 +6,11 @@ import classes.utils as u
 
 class NeuralLayer(Layer):
 
-    def __init__(self, input_size, k, u_type='adam', a_type='relu'):
+    def __init__(self, input_size, k, u_type='adam', a_type='relu', dropout=1):
         self.neurons = []
         self.forward_result = None
         self.k = k
+        self.dropout = dropout
 
         self.u_type = u_type
         self.a_type= a_type
@@ -19,14 +20,16 @@ class NeuralLayer(Layer):
 
         for n in range(k):
             n = Neuron(input_size)
+
             if u_type == 'adam':
-                n.m_bias, n.v_bias, n.m, n.v = 0, 0, 0, 0
+                n.m, n.v = 0, 0
             elif u_type == 'm':
-                n.v_bias, n.v = 0, 0
+                n.v = 0, 0
             elif u_type == 'nag':
-                n.v, n.v_bias, n.v_prev, n.v_prev_bias = 0, 0, 0, 0
+                n.v, n.v_prev = 0, 0
             elif u_type == 'rmsprop':
-                n.cache, n.cache_bias, n.v, n.v = 0, 0, 0, 0
+                n.cache, n.v = 0, 0
+
             self.neurons.append(n)
 
     def predict(self, batch):
@@ -51,7 +54,6 @@ class NeuralLayer(Layer):
 
         if batch.ndim > 2:
             batch = batch.reshape(batch.shape[0], -1).T
-
         forward_result = []
         l2 = 0
         for n in self.neurons:

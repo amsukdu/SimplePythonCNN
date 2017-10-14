@@ -52,25 +52,23 @@ test_images = test_images.astype(np.float32)
 test_labels = data['labels']
 
 lr = 1e-4
-dropout_percent = 1
-l2_reg = 6e-6
+l2_reg = 8e-6
 learning_rate_decay = np.float32(96e-2)
 batch_size = 1
 
 cnn = NeuralNetwork(train_images.shape[1:],
                     [
                         {'type': 'conv', 'k': 16, 'u_type': 'nag', 'f': 5, 's': 1, 'p': 2},
-                        {'type': 'pool'},
+                        {'type': 'pool', 'method': 'average'},
                         {'type': 'conv', 'k': 20, 'u_type': 'nag', 'f': 5, 's': 1, 'p': 2},
-                        {'type': 'pool'},
+                        {'type': 'pool', 'method': 'average'},
                         {'type': 'conv', 'k': 20, 'u_type': 'nag', 'f': 5, 's': 1, 'p': 2},
-                        {'type': 'pool'},
-                        {'type': 'output', 'k': len(le.classes_), 'u_type': 'nag'}
+                        {'type': 'pool', 'method': 'average'},
+                        {'type': 'output', 'k': len(le.classes_), 'u_type': 'adam'}
                     ]
-                    , lr, l2_reg=l2_reg, dropout_p=dropout_percent)
+                    , lr, l2_reg=l2_reg)
 
-cnn.epoch_count = 0
-
+train_images, train_labels = shuffle(train_images, train_labels)
 for i in range(60000000):
     start = i * batch_size % len(train_images)
     end = start + batch_size
@@ -81,15 +79,17 @@ for i in range(60000000):
         print('{} epoch finish. learning rate is {}'.format(str(cnn.epoch_count), str(cnn.lr)))
         cnn.lr *= learning_rate_decay
 
-        loss, acc = cnn.predict(train_images[:2000], train_labels[:2000])
+        loss, acc = cnn.predict(train_images[:4000], train_labels[:4000])
         print('training acc:{}'.format(acc))
         print('training loss:{}'.format(loss))
 
-        test_loss, test_acc = cnn.predict(test_images[:5000], test_labels[:5000])
+        test_loss, test_acc = cnn.predict(test_images[:10000], test_labels[:10000])
         print('test acc:{}'.format(test_acc))
         print('test loss:{}'.format(test_loss))
 
     cnn.t += 1
     loss, acc = cnn.epoch(train_images[start:end], train_labels[start:end])
+
     # print(loss)
     # print(acc)
+

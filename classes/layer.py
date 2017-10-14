@@ -7,6 +7,7 @@ class Layer(object):
     is_output = False
     activation = True
     u_type = 'adam'
+    dropout = 1
 
     @abstractmethod
     def forward(self, batch):
