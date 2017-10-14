@@ -3,17 +3,17 @@ from classes.layer import Layer
 import classes.utils as u
 
 
-# TODO only not overlapping f & s works...
 class PoolLayer(Layer):
-    def __init__(self, input_size, f=2, s=2):
-
-        assert f == s
+    def __init__(self, input_size, f=2, s=2, method='max', dropout=1):
+        # assert f == s
 
         self.image_size = 0
         self.d = input_size[0]
         self.h = input_size[1]
         self.w = input_size[2]
+        self.method = method
         self.argmax = None
+        self.dropout = dropout
 
         self.f = f
         self.s = s
@@ -24,25 +24,6 @@ class PoolLayer(Layer):
         self.w2 = int((self.w - self.f) / self.s + 1)
         self.h2 = int((self.h - self.f) / self.s + 1)
 
-        self.indices = []
-
-        field_size = self.f * self.f
-
-        offset = 0
-        i_offset = 0
-        for i in range(self.h):
-            if i % self.f == 0:
-                start = self.w * i
-                offset = start
-                i_offset = i
-            else:
-                start = self.f * (i - i_offset) + offset
-
-            for j in range(int(self.w / self.f)):
-                self.indices += range(start, start + self.f)
-                start += field_size
-
-
 
     def predict(self, batch):
         self.image_size = batch.shape[0]
@@ -52,21 +33,36 @@ class PoolLayer(Layer):
         if d.ndim < 4:
             d = d.reshape(self.image_size, self.d, self.h2, self.w2)
 
-        temp = d.reshape(-1, self.d, self.h2*self.w2, 1)
-        result = (temp * self.argmax).reshape(d.shape[0], self.d, -1)
-        result = result[:, :, self.indices].reshape(d.shape[0], self.d, self.h, self.w)
+        dout_flat = d.transpose(2, 3, 0, 1).ravel()
 
-        return result
+        if self.method == 'max':
+            dX_col = np.zeros((self.f**2, self.h2 * self.w2 * self.d * self.image_size)).astype(np.float32)
+            dX_col[self.argmax, range(self.argmax.size)] = dout_flat
+        elif self.method == 'average':
+            field_size = self.f**2
+            dout_flat /= field_size
+            dX_col = np.zeros((self.f**2, self.h2 * self.w2 * self.d * self.image_size)).astype(np.float32)
+            dX_col[range(field_size), :] = dout_flat
+        else:
+            raise ValueError('pool layer type error!')
+
+        dX = u.col2im_indices(dX_col, (self.image_size * self.d, 1, self.h, self.w), self.f, self.f, padding=0, stride=self.s)
+        return dX.reshape(self.image_size, self.d, self.h, self.w)
 
     def forward(self, batch):
         self.image_size = batch.shape[0]
-        k, i, j = u.get_im2col_indices(batch.shape, self.f, self.f, 0, self.s)
-        cols = batch[:, k, i, j].reshape(batch.shape[0], self.d, -1, self.h2 * self.w2).transpose(0, 1, 3, 2)
-        temp = np.amax(cols, axis=3, keepdims=True)
-        self.argmax = cols == temp
-        result = temp.reshape(self.image_size, self.d, self.h2, self.w2)
+        batch_reshaped = batch.reshape(self.image_size * self.d, 1, self.h, self.w)
+        X_col = u.im2col_indices(batch_reshaped, self.f, self.f, padding=0, stride=self.s)
 
-        return (result, 0)
+        if self.method == 'max':
+            self.argmax = np.argmax(X_col, axis=0)
+            out = X_col[self.argmax, range(self.argmax.size)]
+        elif self.method == 'average':
+            out = np.average(X_col, axis=0)
+        else:
+            raise ValueError('pool layer type error!')
+
+        return out.reshape(self.h2, self.w2, self.image_size, self.d).transpose(2, 3, 0, 1), 0
 
     def update(self, lr, l2_reg, t=0):
         pass
